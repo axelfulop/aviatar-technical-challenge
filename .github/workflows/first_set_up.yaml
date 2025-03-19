@@ -1,0 +1,60 @@
+name: Create Sensors Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (dev, stg, prd)'
+        required: true
+        type: choice
+        options:
+          - dev
+          - stg
+          - prd
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    env:
+        REGION: ${{ secrets.REGION }}  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        working-directory: terraform/environment/${{ inputs.environment }}
+        run: terraform fmt -check
+
+      - name: Initialize Terraform
+        working-directory: terraform/environment/${{ inputs.environment }}
+        run: terraform init
+
+
+      - name: Set Project ID for the selected environment
+        id: set_project_id
+        run: |
+          if [[ "${{ inputs.environment }}" == "dev" ]]; then
+            echo "PROJECT_ID=${{ secrets.DEV_PROJECT_ID }}" >> $GITHUB_ENV
+          elif [[ "${{ inputs.environment }}" == "stg" ]]; then
+            echo "PROJECT_ID=${{ secrets.STG_PROJECT_ID }}" >> $GITHUB_ENV
+          elif [[ "${{ inputs.environment }}" == "prd" ]]; then
+            echo "PROJECT_ID=${{ secrets.PRD_PROJECT_ID }}" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Terraform Plan 
+        working-directory: terraform/environment/${{ inputs.environment }}
+        run: terraform plan -var="region=${{ env.REGION }}" -var="project_id=${{ env.PROJECT_ID }}" -input=false -target=module.sensors_artifact
+
+      - name: Terraform Apply (for sensors_artifact module only)
+        working-directory: terraform/environment/${{ inputs.environment }}
+        run: terraform apply -input=false -auto-approve var="region=${{ env.REGION }}" -var="project_id=${{ env.PROJECT_ID }}" -target=module.sensors_artifact

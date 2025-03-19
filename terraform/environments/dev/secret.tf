@@ -12,4 +12,4 @@ module "topic_id" {
   }
 
   depends_on = [ module.sensors_topic ]
-}#
+}
