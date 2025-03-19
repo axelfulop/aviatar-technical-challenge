@@ -31,11 +31,11 @@ jobs:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Format
-        working-directory: terraform/environment/${{ inputs.environment }}
+        working-directory: terraform/environments/${{ inputs.environment }}
         run: terraform fmt -check
 
       - name: Initialize Terraform
-        working-directory: terraform/environment/${{ inputs.environment }}
+        working-directory: terraform/environments/${{ inputs.environment }}
         run: terraform init
 
 
@@ -52,9 +52,9 @@ jobs:
         shell: bash
 
       - name: Terraform Plan 
-        working-directory: terraform/environment/${{ inputs.environment }}
+        working-directory: terraform/environments/${{ inputs.environment }}
         run: terraform plan -var="region=${{ env.REGION }}" -var="project_id=${{ env.PROJECT_ID }}" -input=false -target=module.sensors_artifact
 
       - name: Terraform Apply (for sensors_artifact module only)
-        working-directory: terraform/environment/${{ inputs.environment }}
-        run: terraform apply -input=false -auto-approve var="region=${{ env.REGION }}" -var="project_id=${{ env.PROJECT_ID }}" -target=module.sensors_artifact
+        working-directory: terraform/environments/${{ inputs.environment }}
+        run: terraform apply -input=false -auto-approve -var="region=${{ env.REGION }}" -var="project_id=${{ env.PROJECT_ID }}" -target=module.sensors_artifact
