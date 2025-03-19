@@ -20,7 +20,7 @@ terraform/
 ```
 ## Set UP
  We need to allow TF Cloud to create the GCP resources, so for security reasons, i decided to use a Workload identity pool. This cfg could be done manually or with /scripts/tf_cloud_setup.sh
- 
+
  Then we will save ENV VARS in TF CLOUD that will allow us create resources based in the roles assgined to the Service Account created
 ```
 TFC_GCP_PROVIDER_AUTH
@@ -167,7 +167,7 @@ module "sensor_dataflow" {
   machine_type       = "n1-standard-1"
   topic_id           = "sensor_data_topic"
 }
-
+```
 ---
 
 ### Networking Module
@@ -212,7 +212,7 @@ module "my_network" {
   source_ranges              = ["10.0.0.0/8"]
   project_id                 = "my-gcp-project"
 }
-
+```
 ---
 
 ### Secrets Manager Module
@@ -238,3 +238,4 @@ module "my_secrets" {
     "database-password" = "my-secret-database-password"
   }
 }
+```
